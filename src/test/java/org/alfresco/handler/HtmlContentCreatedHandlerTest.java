@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.activemq.ActiveMQContainer;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ public class HtmlContentCreatedHandlerTest {
 
     // Declare containers as static fields for reusability across tests
     private static AlfrescoContainer<?> alfrescoContainer;
-    private static GenericContainer<?> activemqContainer;
+    private static ActiveMQContainer activemqContainer;
 
     // In-memory log appender for capturing logs during tests
     private ListAppender<ILoggingEvent> listAppender;
@@ -76,10 +76,9 @@ public class HtmlContentCreatedHandlerTest {
      */
     @BeforeAll
     static void setUp() {
-        alfrescoContainer = new AlfrescoContainer<>();
-        alfrescoContainer.createDefaultPostgreSQLContainer();
-        activemqContainer = alfrescoContainer.createDefaultActivemqContainer();
-        alfrescoContainer.startServices();
+        alfrescoContainer = new AlfrescoContainer<>("23.2.1").withMessagingEnabled();
+        alfrescoContainer.start();
+        activemqContainer = alfrescoContainer.getActivemqContainer();
     }
 
     /**
