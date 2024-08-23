@@ -50,6 +50,17 @@ The project is organized as follows:
 - **`AlfrescoClient.java`**: A simple REST client for interacting with the Alfresco API.
 
 
+>> Note that using this sample requires [Alfresco Nexus](https://nexus.alfresco.com/nexus/) credentials, as it's using the following Enterprise artifact:
+
+```xml
+    <!-- Alfresco Enterprise Events -->
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>acs-enterprise-event-model</artifactId>
+      <version>0.0.64</version>
+    </dependency>
+```    
+
 ## Additional Notes
 
 Refer to the `application.properties` and the relevant Java classes for further details on configuration and implementation. For any issues or questions, consult the [TestContainers documentation](https://testcontainers.com/modules/alfresco/) or the Alfresco Community forums.
