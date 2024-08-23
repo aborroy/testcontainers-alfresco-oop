@@ -10,12 +10,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Simple Alfresco REST API Client.
+ * A simple client for interacting with the Alfresco REST API.
+ * <p>
+ * This client provides methods for authenticating with Alfresco and creating files (HTML and TXT) within the Alfresco repository.
+ * It uses OkHttp as the HTTP client and Jackson for JSON parsing.
  */
 @Service
 public class AlfrescoClient {
 
     private static final OkHttpClient CLIENT = new OkHttpClient();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final String USER_ID = "admin";
     private static final String PASSWORD = "admin";
@@ -26,14 +30,22 @@ public class AlfrescoClient {
 
     private String alfrescoUrl;
 
+    /**
+     * Sets the base URL for the Alfresco instance.
+     *
+     * @param protocol the protocol to use (e.g., "http" or "https")
+     * @param host     the host name or IP address of the Alfresco server
+     * @param port     the port number on which Alfresco is running
+     * @param context  the context path of the Alfresco web application
+     */
     public void setAlfrescoUrl(String protocol, String host, int port, String context) {
         this.alfrescoUrl = String.format("%s://%s:%d/%s", protocol, host, port, context);
     }
 
     /**
-     * Obtain an Alfresco authentication ticket.
+     * Obtains an authentication ticket from Alfresco using the default admin credentials.
      *
-     * @return the authentication ticket
+     * @return the authentication ticket as a String
      * @throws IOException if there is an error during the HTTP request
      */
     private String getAlfrescoAuthTicket() throws IOException {
@@ -54,55 +66,56 @@ public class AlfrescoClient {
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to obtain Alfresco auth ticket: " + response);
             }
-            assert response.body() != null;
-            JsonNode jsonNode = new ObjectMapper().readTree(response.body().string());
+            JsonNode jsonNode = OBJECT_MAPPER.readTree(response.body().string());
             return jsonNode.path("entry").path("id").asText();
         }
     }
 
     /**
-     * Create an HTML file in Alfresco.
+     * Creates an HTML file in the Alfresco repository.
      *
-     * @return the name of the created node
+     * @param filename the name of the HTML file to be created
+     * @return the name of the created node in Alfresco
      * @throws IOException if there is an error during the HTTP request
      */
-    public String createHtmlFileInAlfresco() throws IOException {
-        String jsonBody = """
+    public String createHtmlFileInAlfresco(String filename) throws IOException {
+        String jsonBody = String.format("""
         {
-          "name": "test.html",
+          "name": "%s",
           "nodeType": "cm:content",
           "properties": {
             "cm:title": "Test HTML File"
           }
         }
-        """;
+        """, filename);
         return createFileInAlfresco(jsonBody);
     }
 
     /**
-     * Create a TXT file in Alfresco.
+     * Creates a TXT file in the Alfresco repository.
      *
-     * @return the name of the created node
+     * @param filename the name of the TXT file to be created
+     * @return the name of the created node in Alfresco
      * @throws IOException if there is an error during the HTTP request
      */
-    public String createTxtFileInAlfresco() throws IOException {
-        String jsonBody = """
+    public String createTxtFileInAlfresco(String filename) throws IOException {
+        String jsonBody = String.format("""
         {
-          "name": "test.txt",
+          "name": "%s",
           "nodeType": "cm:content",
           "properties": {
             "cm:title": "Test TXT File"
           }
         }
-        """;
+        """, filename);
         return createFileInAlfresco(jsonBody);
     }
 
     /**
-     * Create a file in Alfresco.
+     * Creates a file in the Alfresco repository using the provided JSON body.
      *
-     * @param jsonBody JSON string representing the file properties
-     * @return the name of the created node
+     * @param jsonBody JSON string representing the file properties and metadata
+     * @return the name of the created node in Alfresco
      * @throws IOException if there is an error during the HTTP request
      */
     private String createFileInAlfresco(String jsonBody) throws IOException {
@@ -118,19 +131,19 @@ public class AlfrescoClient {
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to create file in Alfresco: " + response);
             }
-            assert response.body() != null;
-            JsonNode jsonNode = new ObjectMapper().readTree(response.body().string());
+            JsonNode jsonNode = OBJECT_MAPPER.readTree(response.body().string());
             return jsonNode.path("entry").path("name").asText();
         }
     }
 
     /**
-     * Encode the authentication ticket using Base64.
+     * Encodes the provided authentication ticket using Base64 encoding.
      *
      * @param authTicket the authentication ticket to encode
-     * @return the encoded ticket as a Base64 string
+     * @return the Base64 encoded authentication ticket
      */
     private String encodeCredentials(String authTicket) {
         return Base64.getEncoder().encodeToString(authTicket.getBytes(StandardCharsets.UTF_8));
     }
+
 }

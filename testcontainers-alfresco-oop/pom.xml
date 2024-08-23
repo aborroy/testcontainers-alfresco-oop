@@ -32,12 +32,14 @@
 
   <dependencies>
 
+    <!-- Alfresco OOP SDK -->
     <dependency>
       <groupId>org.alfresco</groupId>
       <artifactId>alfresco-java-event-api-spring-boot-starter</artifactId>
       <version>6.2.0</version>
     </dependency>
 
+    <!-- Testing -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
